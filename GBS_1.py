@@ -15,6 +15,11 @@ This is confirmed, bernoulli.rvs does work fine, just the probability must be ve
 as well as an argument saying covariance is not positive-semidefinite. The x values are very large (order of 10^8), i likely need to
 run this on a hpc cluster or activate higher precision limit. Hence why this regime ain't really classically simulable. The bernoulli prob 
 is vanishingly small that it is basically zero.
+
+To pick get a more balanced output from the GBS function call, i need to make the values in x smaller, which i think means i 
+need a larger determinant in the covariance inversion so the values are smaller. So i want the values of V to larger
+If i get the ln part of the inequality into the negatives then the rampl function makes it zero, so when the argument of
+ln is 0<x<1 then this will happen so i essentially need to have 1-2qD<denominator so high r and small eta?
 """
 
 import numpy as np
@@ -71,26 +76,36 @@ def sampleGBS(r, K, eta, U, etaD, pD, e):
         V = ClosestClassicalState(r, K, eta, U, tbar)
         import time
         t0 = time.time()
+        #print(V)
         x = np.random.multivariate_normal(mean, np.linalg.inv(V-tbar*np.identity(2*M)))
         #print(x)
         # sample from the measurement
         n = [bernoulli.rvs(np.exp(-(x[i]**2 + x[i+1]**2)/4)) for i in range(len(x)-1)] #Missing a few function params
-        print(np.exp(-(x[0]**2 + x[1]**2)/4))
+        #print(np.exp(-(x[0]**2 + x[1]**2)/4))
         #print(((1-pD)/(1-etaD*(1-tbar)/2))*np.exp(-etaD*(x[0]**2 + x[1]**2)/4*(1-etaD*(1-tbar)/2))) #=0
-        print(x[0]) 
-        print(x[1]) 
+        #print(x[0]) 
+        #print(x[1]) 
         #n = [bernoulli.rvs(((1-pD)/(1-etaD*(1-tbar)/2))*np.exp(-etaD*(x[i]**2 + x[i+1]**2)/4*(1-etaD*(1-tbar)/2))) for i in range(len(x)-1)]
         #n=[bernoulli.rvs(0.5) for i in range(len(x)-1)] #Bernoulli function works, values are just punishing
         print("{} sec".format(time.time() - t0))
     return n
 
+#values below from https://www.nature.com/articles/s41567-019-0567-8
+#r = 0.1
+#K = 4
+#eta = 0.088
+#U = unitary_group.rvs(12)
+#etaD = 0.78
+#pD = 10**(-4)
+#e = 0.023
 
+#New values to get some more balanced results for simulation, these give a more balanced output
 r = 0.1
 K = 4
-eta = 0.088
+eta = 0.5
 U = unitary_group.rvs(12)
 etaD = 0.78
-pD = 10**(-4)
+pD = 10**(-1)
 e = 0.023
 
 n = sampleGBS(r, K, eta, U, etaD, pD, e)

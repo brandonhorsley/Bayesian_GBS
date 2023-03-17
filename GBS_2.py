@@ -6,5 +6,8 @@ Inspiration for this can maybe come from:
 https://journals.aps.org/pra/pdf/10.1103/PhysRevA.100.012326
 https://github.com/XanaduAI/constrained-quantum-learning/blob/master/three_mode.py
 
-The function of this file would be to investigate optimisation of different distance measures to see if improvement can be had?
+The function of this file would be to investigate optimisation of different distance measures to see if improvement 
+can be had? The code linked talking about constrained quantum learning is mainly aimed at optimising the fidelity
+of the state being prepared, so there is a target state and the aim is to maximise the fidelity of the constructed state 
+with the target state.
 """
