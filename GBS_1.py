@@ -7,6 +7,14 @@ https://arxiv.org/pdf/1905.12075.pdf
 
 with values from:
 https://www.nature.com/articles/s41567-019-0567-8
+
+Curious as to why the code runs but i keep getting a zero array out, is it just the low probability?
+Created an endless loop but i still never got a 1 in any of the outputs, strange. Doing 1-(p arg of bernoulli.rvs)
+gave me a lot of 1's. So perhaps it is the choice of parameters that is resulting in poor show of hits.
+This is confirmed, bernoulli.rvs does work fine, just the probability must be very low. Printing prob gives an answer of 0,
+as well as an argument saying covariance is not positive-semidefinite. The x values are very large (order of 10^8), i likely need to
+run this on a hpc cluster or activate higher precision limit. Hence why this regime ain't really classically simulable. The bernoulli prob 
+is vanishingly small that it is basically zero.
 """
 
 import numpy as np
@@ -44,6 +52,7 @@ def ClosestClassicalState(r, K, eta,U,t):
     eng = sf.Engine('gaussian')
     result = eng.run(prog)
     cov = result.state.cov()
+    #print(cov)
     return cov
 
 
@@ -63,8 +72,15 @@ def sampleGBS(r, K, eta, U, etaD, pD, e):
         import time
         t0 = time.time()
         x = np.random.multivariate_normal(mean, np.linalg.inv(V-tbar*np.identity(2*M)))
+        #print(x)
         # sample from the measurement
-        n = [bernoulli.rvs(np.exp(-(x[i]**2 + x[i+1]**2)/4)) for i in range(len(x)-1)]
+        n = [bernoulli.rvs(np.exp(-(x[i]**2 + x[i+1]**2)/4)) for i in range(len(x)-1)] #Missing a few function params
+        print(np.exp(-(x[0]**2 + x[1]**2)/4))
+        #print(((1-pD)/(1-etaD*(1-tbar)/2))*np.exp(-etaD*(x[0]**2 + x[1]**2)/4*(1-etaD*(1-tbar)/2))) #=0
+        print(x[0]) 
+        print(x[1]) 
+        #n = [bernoulli.rvs(((1-pD)/(1-etaD*(1-tbar)/2))*np.exp(-etaD*(x[i]**2 + x[i+1]**2)/4*(1-etaD*(1-tbar)/2))) for i in range(len(x)-1)]
+        #n=[bernoulli.rvs(0.5) for i in range(len(x)-1)] #Bernoulli function works, values are just punishing
         print("{} sec".format(time.time() - t0))
     return n
 
